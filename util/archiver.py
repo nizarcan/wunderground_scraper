@@ -1,3 +1,4 @@
+from util.processor import fill_final_table
 import pandas as pd
 import os
 
@@ -25,7 +26,7 @@ def restore_backup(backup_flag=None):
     return historical_data, forecast_data
 
 
-def create_xl_file(historical_df, forecast_df, output_path):
+def export_tables(historical_df, forecast_df, to_sas=False, to_xl=True, xl_export_path=""):
     combined_dfs = pd.concat([forecast_df[x] for x in forecast_df.keys()], axis=0)
     combined_dfs = combined_dfs[combined_dfs.RecordDate.eq(combined_dfs.RecordDate.max())]
     combined_dfs = pd.concat([combined_dfs] + [historical_df[x] for x in historical_df.keys()], axis=0)
@@ -33,4 +34,9 @@ def create_xl_file(historical_df, forecast_df, output_path):
                                             ascending=[True, True, True, True], ignore_index=True)
     combined_dfs = combined_dfs.drop_duplicates(subset=["WeatherDate", "Time", "City"],
                                                 keep="first").reset_index(drop=True)
-    combined_dfs.iloc[:, :-1].to_excel(output_path, index=False)
+    combined_dfs = fill_final_table(combined_dfs)
+    if to_xl:
+        combined_dfs.iloc[:, :-1].to_excel(xl_export_path, index=False)
+    if to_sas:
+        # todo: add this
+        pass
