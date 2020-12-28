@@ -1,7 +1,10 @@
 from util.archiver import *
 from util.scraper import *
+import os
 
-_START_DATE = pd.to_datetime("20190101", format="%Y%m%d")
+os.chdir("C:/Users/nizarabdulkadir.can/Projects/wunderground_scraper")
+
+_START_DATE = pd.to_datetime("20180101", format="%Y%m%d")
 _WEATHER_SOURCES = {
     "ANKARA": "LTAC",
     "ADANA": "tr/seyhan/LTAF",
@@ -25,4 +28,4 @@ if backup_data:
 
 print_results = True
 if print_results:
-    create_xl_file(historical_data, forecast_data, _EXPORT_PATH)
+    export_tables(historical_data, forecast_data, to_sas=False, to_xl=True, xl_export_path=_EXPORT_PATH)

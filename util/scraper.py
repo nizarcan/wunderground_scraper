@@ -130,7 +130,7 @@ def update_historical_data(_current_archive, _wunderground_extensions, start_dat
 def update_forecast_data(_current_archive, _wunderground_extensions):
     _START_DATE = pd.to_datetime(pd.to_datetime("today").date())
     # noinspection PyTypeChecker
-    _END_DATE = pd.to_datetime(pd.to_datetime("today").date()) + pd.to_timedelta("15 days")
+    _END_DATE = pd.to_datetime(pd.to_datetime("today").date()) + pd.to_timedelta("16 days")
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
