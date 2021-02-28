@@ -1,5 +1,5 @@
-from util.archiver import *
-from util.scraper import *
+from util.archiver import export_tables, restore_backup
+from util.scraper import update_historical_data, update_forecast_data
 from saspy import SASsession
 import sqlalchemy
 import threading
@@ -18,7 +18,7 @@ update_data = True
 backup_data = True
 
 print_results = True
-to_sas = False
+to_sas = True
 to_xl = True
 
 
