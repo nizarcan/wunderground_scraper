@@ -3,9 +3,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium import webdriver
+from selenium.webdriver.remote.remote_connection import LOGGER, logging
 from time import sleep
 import pandas as pd
 from util.processor import fill_historical_values, fill_forecast_values
+
+LOGGER.setLevel(logging.WARNING)
 
 _WUT_CONV_DICT = {
     "12:50 AM": 1, "6:50 AM": 7, "12:50 PM": 13, "6:50 PM": 19,
@@ -102,12 +105,12 @@ def update_historical_data(_current_archive, _wunderground_extensions, start_dat
                 in_while = True
                 while in_while:
                     try:
-                        curr_table = WebDriverWait(driver, 20).until(
+                        curr_table = WebDriverWait(driver, 100).until(
                             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
                         )[1]
                         in_while = False
                     except IndexError:
-                        curr_table = WebDriverWait(driver, 20).until(
+                        curr_table = WebDriverWait(driver, 100).until(
                             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
                         )[0]
                         if 'Condition' in pd.read_html(curr_table.get_attribute('outerHTML'))[0].dropna(
@@ -130,7 +133,7 @@ def update_historical_data(_current_archive, _wunderground_extensions, start_dat
 def update_forecast_data(_current_archive, _wunderground_extensions):
     _START_DATE = pd.to_datetime(pd.to_datetime("today").date())
     # noinspection PyTypeChecker
-    _END_DATE = pd.to_datetime(pd.to_datetime("today").date()) + pd.to_timedelta("16 days")
+    _END_DATE = pd.to_datetime(pd.to_datetime("today").date()) + pd.to_timedelta("7 days")
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -151,12 +154,12 @@ def update_forecast_data(_current_archive, _wunderground_extensions):
         in_while = True
         while in_while:
             try:
-                curr_table = WebDriverWait(driver, 20).until(
+                curr_table = WebDriverWait(driver, 100).until(
                     EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
                 )[1]
                 in_while = False
             except IndexError:
-                curr_table = WebDriverWait(driver, 20).until(
+                curr_table = WebDriverWait(driver, 100).until(
                     EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
                 )[0]
                 if 'Condition' in pd.read_html(curr_table.get_attribute('outerHTML'))[0].dropna(
@@ -179,12 +182,12 @@ def update_forecast_data(_current_archive, _wunderground_extensions):
             in_while = True
             while in_while:
                 try:
-                    curr_table = WebDriverWait(driver, 20).until(
+                    curr_table = WebDriverWait(driver, 100).until(
                         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
                     )[1]
                     in_while = False
                 except IndexError:
-                    curr_table = WebDriverWait(driver, 20).until(
+                    curr_table = WebDriverWait(driver, 100).until(
                         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
                     )[0]
                     if 'Conditions' in pd.read_html(curr_table.get_attribute('outerHTML'))[0].dropna(

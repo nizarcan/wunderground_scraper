@@ -68,12 +68,12 @@ for curr_city in _WEATHER_SOURCES.keys():
                 in_while = True
                 while in_while:
                     try:
-                        curr_table = WebDriverWait(driver, 20).until(
+                        curr_table = WebDriverWait(driver, 100).until(
                             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
                         )[1]
                         in_while = False
                     except IndexError:
-                        curr_table = WebDriverWait(driver, 20).until(
+                        curr_table = WebDriverWait(driver, 100).until(
                             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
                         )[0]
                         if 'Condition' in pd.read_html(curr_table.get_attribute('outerHTML'))[0].dropna(how="any").columns:
