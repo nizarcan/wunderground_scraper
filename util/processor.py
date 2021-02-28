@@ -2,7 +2,7 @@ import pandas as pd
 
 weather_data_cols = ['City', 'RecordDate', 'WeatherDate', 'Time', 'Temperature', 'Dew Point',
                      'Humidity', 'Wind', 'Wind Speed', 'Wind Gust', 'Pressure', 'Precip.',
-                     'Condition', 'IsForecast']
+                     'Condition']
 
 
 def fill_historical_values(df):
@@ -30,6 +30,7 @@ def fill_historical_values(df):
 
 def fill_forecast_values(df):
     df = df.copy()
+    df['Precip.'] = df['Precip.'].str.split(" ", expand=True)[0]
     try:
         df[["Temperature", "Dew Point", "Humidity", "Wind Speed", "Wind Gust", "Pressure", "Precip."]] = \
             df[["Temperature", "Dew Point", "Humidity", "Wind Speed", "Wind Gust", "Pressure", "Precip."]].astype(float)
@@ -38,9 +39,8 @@ def fill_forecast_values(df):
             "Wind Gust", "Pressure", "Precip."]] = \
             df[["Temperature", "Dew Point", "Humidity", "Wind Speed",
                 "Wind Gust", "Pressure", "Precip."]].replace(",", "", regex=True).astype(float)
-    df.loc[df.Time.eq(24), ['Time', 'WeatherDate']] = [0, df.WeatherDate + pd.to_timedelta("1 days")]
     df.Time = df.Time.astype(int)
-    df = df.reset_index()[weather_data_cols].sort_values(by=["City", "RecordDate", "WeatherDate", "Time"],
+    df = df.reset_index()[weather_data_cols].sort_values(by=["RecordDate", "WeatherDate", "Time"],
                                                          ignore_index=True)
     return df
 
@@ -54,12 +54,12 @@ def fill_final_table(df):
         sep_tables[city].set_index("WeatherDate", inplace=True)
         sep_tables[city] = sep_tables[city].resample("h").first()
         while sep_tables[city].isna().sum().sum() > 0:
-            sep_tables[city] = sep_tables[city].fillna(sep_tables[city].shift(1))
+            sep_tables[city] = sep_tables[city].fillna(sep_tables[city].shift(24))
         sep_tables[city] = sep_tables[city].reset_index()[weather_data_cols].sort_values(by=["WeatherDate", "Time"],
                                                                                          ignore_index=True)
         sep_tables[city].Time = sep_tables[city].WeatherDate.dt.hour
         sep_tables[city].WeatherDate = pd.to_datetime(sep_tables[city].WeatherDate.dt.date)
     final_table = pd.concat([sep_tables[city] for city in sep_tables.keys()], axis=0, ignore_index=True)
-    final_table.sort_values(by=["WeatherDate", "Time", "City", "IsForecast"],
-                            ascending=[True, True, True, True], ignore_index=True, inplace=True)
+    final_table = final_table.sort_values(by=["WeatherDate", "Time", "City"],
+                                          ascending=[True, True, True], ignore_index=True)
     return final_table
