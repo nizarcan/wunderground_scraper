@@ -6,7 +6,7 @@ import threading
 import os
 
 main_dir = os.path.dirname(os.path.abspath(__file__))
-db_path = f"{os.path.dirname(os.path.abspath(__file__))}/wunderground_data.db"
+db_path = f"{os.path.dirname(os.path.abspath(__file__))}/data/wunderground_data.db"
 export_path = "P:/BASKENT/Da_Op_Dir/Musteri_Dagitim_Operasyonlari_Grup_Mudurlugu/" \
                "6. Enerji Yönetimi ve Analiz Müdürlüğü/1. Enerji Yonetimi/00.Sıcaklık/WUNDERGROUND_DATA.xlsx"
 os.chdir(main_dir)
