@@ -5,10 +5,10 @@ import sqlalchemy
 import threading
 import os
 
+
 main_dir = os.path.dirname(os.path.abspath(__file__))
 db_path = f"{os.path.dirname(os.path.abspath(__file__))}/data/wunderground_data.db"
-export_path = "P:/BASKENT/Da_Op_Dir/Musteri_Dagitim_Operasyonlari_Grup_Mudurlugu/" \
-               "6. Enerji Yönetimi ve Analiz Müdürlüğü/1. Enerji Yonetimi/00.Sıcaklık/WUNDERGROUND_DATA.xlsx"
+export_path = f"{os.path.dirname(os.path.abspath(__file__))}/data/WUNDERGROUND_DATA.xlsx"
 os.chdir(main_dir)
 db_conn = sqlalchemy.create_engine(f"sqlite:///{db_path}")
 
@@ -24,7 +24,7 @@ to_xl = True
 
 if update_data:
     # historical data updating
-    print("----------- STARTING HISTORICAL DATA UPDATE -----------")
+    print("<----------- STARTING HISTORICAL DATA UPDATE ----------->")
     threads = []
     for city in cities:
         x = threading.Thread(target=update_historical_data, args=(city, db_conn), daemon=True)
@@ -33,9 +33,9 @@ if update_data:
 
     for thread in threads:
         thread.join()
-    print("----------- FINISHED HISTORICAL DATA UPDATE -----------\n\n", end="")
+    print("<----------- FINISHED HISTORICAL DATA UPDATE ----------->\n\n", end="")
 
-    print("----------- STARTING FORECAST DATA UPDATE -----------")
+    print("<------------ STARTING FORECAST DATA UPDATE ------------>")
     threads = []
     for city in cities:
         x = threading.Thread(target=update_forecast_data, args=(city, db_conn, 15), daemon=True)
@@ -44,7 +44,7 @@ if update_data:
 
     for thread in threads:
         thread.join()
-    print("----------- FINISHED FORECAST DATA UPDATE -----------\n", end="")
+    print("<------------ FINISHED FORECAST DATA UPDATE ------------>\n\n", end="")
 
 historical_data, forecast_data = restore_backup(db_conn)
 

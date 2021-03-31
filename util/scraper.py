@@ -3,14 +3,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium import webdriver
-from selenium.webdriver.remote.remote_connection import LOGGER, logging
 from time import sleep
 import pandas as pd
 from util.processor import fill_historical_values, fill_forecast_values
 
 TODAY_DATETIME = pd.to_datetime(pd.to_datetime('today').date())
-
-LOGGER.setLevel(logging.WARNING)
 
 HISTORY_XPATH = "/html/body/app-root/app-history/one-column-layout/wu-header/sidenav/mat-sidenav-container" + \
                 "/mat-sidenav-content/div/section/div[2]/div/div[5]/div/div/" + \
@@ -58,12 +55,11 @@ TABLE_COLUMNS = [
 
 
 def create_new_driver(headless=True):
+    chrome_options = Options()
     if headless:
-        chrome_options = Options()
         chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome(options=chrome_options)
-    else:
-        driver = webdriver.Chrome()
+    chrome_options.add_argument('--log-level=3')
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get("https://www.wunderground.com/")
     celcius_button = driver.find_elements_by_xpath("""//*[@id="wuSettings"]""")[0]
     celcius_button.click()
@@ -152,7 +148,7 @@ def update_historical_data(city, db_conn):
         new_data.append(
             format_table(pd.read_html(curr_table.get_attribute('outerHTML'))[0].dropna(how="any"),
                          curr_dt))
-        print(f"HISTORICAL DATA ::: {city.capitalize().center(10)} ::: {curr_dt.date()}")
+        print(f"HISTORICAL DATA  ::::  {city.capitalize().center(10)}  ::::  {curr_dt.date()}")
     new_df = pd.concat(new_data, axis=0, ignore_index=True)
     new_df = fill_historical_values(new_df)
     new_df.to_sql(f"h_{city}", db_conn, if_exists='append', index=False)
@@ -161,7 +157,7 @@ def update_historical_data(city, db_conn):
 
 def update_forecast_data(city, db_conn, days):
     last_date = pd.to_datetime(
-        pd.read_sql_query(f"SELECT MAX(WeatherDate) FROM f_{city}", db_conn).values[0][0].split(" ")[0],
+        pd.read_sql_query(f"SELECT MAX(RecordDate) FROM f_{city}", db_conn).values[0][0].split(" ")[0],
         format="%Y-%m-%d"
     )
     if last_date >= TODAY_DATETIME:
@@ -208,7 +204,7 @@ def update_forecast_data(city, db_conn, days):
                 sleep(3)
         new_data.append(format_table(pd.read_html(curr_table.get_attribute('outerHTML'))[0].dropna(how="any"),
                                      curr_dt, forecast=True))
-        print(f"FORECAST ::: {city.capitalize().center(10)} - {curr_dt.date()}")
+        print(f"FORECAST DATA  ::::  {city.capitalize().center(10)}  ::::  {curr_dt.date()}")
     new_df = pd.concat(new_data, axis=0, ignore_index=True)
     new_df = fill_forecast_values(new_df)
     new_df.to_sql(f"f_{city}", db_conn, if_exists='append', index=False)

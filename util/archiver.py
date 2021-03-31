@@ -15,10 +15,17 @@ def restore_backup(db_conn):
     table_names = [x for x in db_conn.table_names() if x[:2] == "h_" or x[:2] == "f_"]
     historical_data = {}
     for table_name in [x for x in table_names if x[0] == "h"]:
-        historical_data["_".join(table_name.split("_")[1:])] = pd.read_sql_table(table_name, db_conn)
+        t_name = "_".join(table_name.split("_")[1:])
+        historical_data[t_name] = pd.read_sql_table(table_name, db_conn)
+        historical_data[t_name]['WeatherDate'] = pd.to_datetime(historical_data[t_name]['WeatherDate'])
+        historical_data[t_name]['RecordDate'] = pd.to_datetime(historical_data[t_name]['RecordDate'])
     forecast_data = {}
     for table_name in [x for x in table_names if x[0] == "f"]:
-        forecast_data["_".join(table_name.split("_")[1:])] = pd.read_sql_table(table_name, db_conn)
+        t_name = "_".join(table_name.split("_")[1:])
+        forecast_data[t_name] = pd.read_sql_table(table_name, db_conn)
+        forecast_data[t_name]['WeatherDate'] = pd.to_datetime(forecast_data[t_name]['WeatherDate'])
+        forecast_data[t_name]['RecordDate'] = pd.to_datetime(forecast_data[t_name]['RecordDate'])
+
     return historical_data, forecast_data
 
 
@@ -48,10 +55,12 @@ def export_tables(historical_data, forecast_data, to_sas=False, to_xl=True, sas_
         combined_data.to_excel(xl_export_path, index=False)
         print("Writing to XL OK.")
         if pivot_temp_cond:
+            pivot_cols = list(combined_data.columns[3:])
             pivoted_df = pd.concat(
                 [combined_data.pivot(index=['City', 'WeatherDate'], columns='Time', values=x) for x in
-                 ['Temperature', 'Condition']]).sort_index(kind='merge').reset_index(drop=False)
-            pivoted_df.insert(2, 'Data', ['Temperature', 'Condition'] * int(pivoted_df.shape[0] / 2))
+                 pivot_cols]).sort_index(kind='merge').reset_index(drop=False)
+            pivoted_df.insert(2, 'Data', pivot_cols * int(pivoted_df.shape[0] / len(pivot_cols)))
             pivoted_df.to_excel(os.path.join("/".join(xl_export_path.split("/")[:-1]), "WUNDERGROUND_PIVOT.xlsx"),
                                 index=False)
+            print("Writing pivot OK.")
     return combined_dfs
