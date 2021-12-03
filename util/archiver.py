@@ -1,30 +1,21 @@
 from util.processor import fill_final_table
+import config as config
 import pandas as pd
 import os
 
 
-def backup_files(historical_data, forecast_data):
-    curr_dt = pd.to_datetime("today").strftime("%Y%m%d_%H%M%S")
-    os.makedirs(f"_backup/{curr_dt}")
-    for curr_city in historical_data.keys():
-        historical_data[curr_city].to_pickle(f"_backup/{curr_dt}/historical_{curr_city.lower()}.bak")
-        forecast_data[curr_city].to_pickle(f"_backup/{curr_dt}/forecast_{curr_city.lower()}.bak")
-
-
 def restore_backup(db_conn):
-    table_names = [x for x in db_conn.table_names() if x[:2] == "h_" or x[:2] == "f_"]
+    table_names = list(config.WEATHER_URL_MAP.keys())
     historical_data = {}
-    for table_name in [x for x in table_names if x[0] == "h"]:
-        t_name = "_".join(table_name.split("_")[1:])
-        historical_data[t_name] = pd.read_sql_table(table_name, db_conn)
-        historical_data[t_name]['WeatherDate'] = pd.to_datetime(historical_data[t_name]['WeatherDate'])
-        historical_data[t_name]['RecordDate'] = pd.to_datetime(historical_data[t_name]['RecordDate'])
+    for table_name in table_names:
+        historical_data[table_name] = pd.read_sql_table(f"h_{table_name}", db_conn)
+        historical_data[table_name]['WeatherDate'] = pd.to_datetime(historical_data[table_name]['WeatherDate'])
+        historical_data[table_name]['RecordDate'] = pd.to_datetime(historical_data[table_name]['RecordDate'])
     forecast_data = {}
-    for table_name in [x for x in table_names if x[0] == "f"]:
-        t_name = "_".join(table_name.split("_")[1:])
-        forecast_data[t_name] = pd.read_sql_table(table_name, db_conn)
-        forecast_data[t_name]['WeatherDate'] = pd.to_datetime(forecast_data[t_name]['WeatherDate'])
-        forecast_data[t_name]['RecordDate'] = pd.to_datetime(forecast_data[t_name]['RecordDate'])
+    for table_name in table_names:
+        forecast_data[table_name] = pd.read_sql_table(f"f_{table_name}", db_conn)
+        forecast_data[table_name]['WeatherDate'] = pd.to_datetime(forecast_data[table_name]['WeatherDate'])
+        forecast_data[table_name]['RecordDate'] = pd.to_datetime(forecast_data[table_name]['RecordDate'])
 
     return historical_data, forecast_data
 

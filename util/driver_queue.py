@@ -20,7 +20,7 @@ def add_to_queue(queue, city):
     queue[city] = create_new_driver()
 
 def create_driver_queue():
-    print("Initiating chromedriver instances...")
+    print("\nInitiating chromedriver instances...")
     driver_queue = {}
     threads = []
     for city in config.WEATHER_URL_MAP.keys():

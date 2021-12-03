@@ -6,6 +6,7 @@ import config as config
 from util.driver_queue import driver_queue
 import sqlalchemy
 
+
 db_conn = sqlalchemy.create_engine(f"sqlite:///{config.db_path}")
 
 if config.update_data:
